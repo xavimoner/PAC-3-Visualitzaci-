@@ -1,0 +1,502 @@
+---
+title: "Visual analytics of hotel bookings data"
+author: "Julià Minguillón (Xavier de Moner)"
+date: "2024-08-12"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+NOTA: este tutorial usa R + RStudio + ciertas librerías (packages) de R para
+mostrar el uso de visualizaciones de datos para inspeccionar y analizar un 
+conjunto de datos. Os recomendamos explorar los siguientes enlaces:
+
+1) RStudio: https://posit.co/downloads/
+2) ggplot2: https://ggplot2.tidyverse.org/
+3) extensiones: https://exts.ggplot2.tidyverse.org/gallery/
+
+## Cargar packages necesarios
+
+```{r packages}
+library("ggmosaic")
+library("ggplot2")
+library("fitdistrplus")
+library("MASS")
+library("survival")
+library("ggstatsplot")
+library("tidyverse")
+```
+
+## Data loading and dimensions (N x M)
+
+Leemos el fichero de datos en formato CSV, tiene 119,390 filas y 32 columnas:
+
+```{r load data}
+x=read.csv("hotel_bookings.csv", stringsAsFactors = T)
+dim(x)
+```
+## Data cleansing
+
+Primero inspeccionaremos los datos usando la función summary() incluída en R. 
+La explicación de cada variable se puede encontrar en el artículo en el cual se
+describe este conjunto de datos de forma detallada, aunque los nombres de las
+variables son casi auto-explicativos:
+
+```{r summary, echo=FALSE}
+summary(x)
+```
+
+# Variables numéricas
+
+Podemos observar algunos valores extraños para algunas variables, por ejemplo:
+
+1) Un máximo de 55 en adults
+2) Un máximo de 10 en children (incluyendo valores perdidos)
+3) Un máximo de 10 en babies
+4) Valores negativos en el coste promedio por día (adr) o muy elevados
+
+Vamos a visualizar el histograma de la variable adults, indicando al menos 55 
+intervalos en el histograma, usando la función hist() de R:
+
+```{r hist_adults}
+hist(x$adults,breaks=55)
+```
+
+Se puede ver que el histograma no muestra ninguna barra alrededor del 55, dado 
+que se trata de un conjunto muy grande y seguramente se tratará solamente de un
+caso o pocos. En estos casos, para analizar valores extremos de una variable se 
+pueden pintar los valores de la variable en cuestión de la siguiente manera, 
+ordenando los datos (si son numéricos como en este caso):
+
+```{r plot_adults}
+plot(sort(x$adults))
+grid()
+```
+La variable Index es la posición del elemento una vez ordenado, pero nos 
+interesa más el eje Y, ya que podemos ver que hay unos pocos elementos con 
+valores de 10 o superior. Como se trata de una variable entera pero con un 
+conjunto limitado de valores posibles podemos usar table() para verlos:
+
+```{r table_adults}
+table(x$adults)
+```
+Como se puede ver, hay un caso de una reserva con 10 adultos, dos con 20 adultos, 
+etc., hasta una de 55 adultos! Sin entrar en más consideraciones, eliminaremos 
+todas las filas con reservas de 10 adultos o más:
+
+```{r clean_adults}
+x=x[x$adults<10,]
+```
+
+EJERCICIO: hacer lo mismo con las variables children y babies
+
+
+```{r 1.EXERCICI_clean_children_and_babies}
+# Treiem els outliers de children i babies
+x <- x[x$children < 10 & x$babies < 10, ]
+
+```
+
+
+El histograma de la variable adr (gasto medio por dí) presenta el mismo problema
+que el caso de la variable adults, así que directamente haremos un gráfico con 
+los valores ordenados:
+
+```{r plot_adr}
+plot(sort(x$adr))
+grid()
+```
+En este caso se ve que hay solamente un valor muy por encima del resto, lo 
+consideramos un outlier y lo eliminamos, así como los valores negativos que no
+tienen una explicación clara, aunque dejamos los valores 0:
+
+```{r clean_adr}
+x=x[x$adr>=0 & x$adr<1000,]
+```
+
+El histograma ahora sí que nos aporta información relevante. Lo dibujamos usando
+el package ggplot2 que ofrece muchas más opciones que hist():
+
+```{r hist_adr}
+ggplot(data=x, aes(x=adr)) + 
+  geom_histogram(bins=55, colour="black", fill = "lightgray") +
+  theme_light()
+```
+EJERCICIO: retocar el gráfico para que el nombre de los ejes, título, etc. sea
+el adecuado para una presentación
+
+
+```{r 2.EXERCICI_revisio_distr_ADR}
+# Afegim títols, noms d'eixos
+ggplot(data=x, aes(x=adr)) + 
+  geom_histogram(bins=55, colour="black", fill="lightblue") +
+  labs(title="Distribució del ADR)",
+       x="ADR (€)", y="Freqüència") +
+  theme_light()
+ggplot(data=x, aes(x=adr)) + 
+  geom_histogram(bins=55, colour="black", fill="lightblue") +
+  labs(title="Distribució del AD",
+       x="ADR (€)", y="Freqüència") +
+  theme_light()
+
+```
+
+
+
+Podemos ver que hay un conjunto de unos 2000 valores 0, los cuales podrían
+ser analizados de forma separada, por ejemplo. Existen packages de R que nos 
+pueden ayudar a estimar dicha distribución y los parámetros que la determinan
+de forma visual, como por ejemplo el package fitdistrplus mediante la función 
+descdist():
+
+
+
+```{r neteja_extra}
+# algun NA quedava
+x <- x[!is.na(x$adr) & !is.nan(x$adr) & !is.infinite(x$adr), ]
+```
+
+
+`
+
+
+```{r descdist}
+require(fitdistrplus)
+descdist(x$adr,boot=1000)
+```
+Como se puede observar, los datos reales (observación, en azul) y los simulados
+(en amarillo) están cerca de lo que podría ser una distribución lognormal.
+
+De todas formas, con el objetivo de experimentar con un conjunto de datos lo más
+limpio posible vamos a proceder a:
+
+1) eliminar las estancias de 0 días
+2) eliminar las estancias a coste 0
+3) eliminar las estancias sin personas
+4) substituir los NA de la variable children por 0
+
+```{r data_cleansing}
+x[is.na(x$children),'children']=0
+x=x[x$adr>0 & (x$stays_in_week_nights+x$stays_in_weekend_nights)>0 & (x$adults+x$children+x$babies)>0 & !is.na(x$children),]
+```
+
+## Variables categóricas
+
+Por lo que respecta a las variables categóricas, la función summary() ya nos da
+una primera idea de los valores posibles que puede coger cada una. Por ejemplo, 
+en el conjunto original (antes de eliminar outliers) hay 79,330 reservas en un
+hotel de ciudad (Lisboa) y 40,060 en un resort (el Algarve). Podemos preguntarnos
+si la distribución del coste es la misma para ambos grupos, ya sea mediante el 
+test estadístico adecuado o simplemente comparando histogramas, en este caso 
+usando el package ggplot2 mucho más potente para crear gráficos de todo tipo:
+
+```{r hist_adr_tipo}
+# require(ggplot2)
+ggplot(data=x, aes(x=adr, fill=hotel)) + 
+  geom_histogram(bins=50, colour="black") +
+  theme_light()
+```
+Se puede observar que los precios en Lisboa (City Hotel) más típicos están 
+ligeramente a la derecha de los más típicos en el Algarve (Resort Hotel), aunque
+en cambio los precios más altos en Lisboa decrecen más rápido que en el Algarve.
+Con un plot de tipo violin podremos ver más detalle, especialmente si también
+mostramos los cuartiles típicos de un box-plot:
+
+```{r violin_adr_tipo}
+ggplot(data=x, aes(x=hotel, y=adr, fill=hotel)) + 
+  geom_violin() + geom_boxplot(width=.1, outliers = F) +
+  coord_flip() + 
+  theme_light()
+```
+Existe un package de R llamado ggstatsplot que dispone de funciones específicas
+para cada tipo de gráfico, incluyendo también los tests estadísticos adecuados
+para establecer si existen diferencias entre grupos:
+
+```{r ggstatsplot}
+# require(ggstatsplot)
+ggbetweenstats(data=x, x=hotel, y=adr)
+```
+
+Una variable interesante es la procedencia de los clientes del hotel (country). 
+El problema es que es una variable con muchos valores diferentes (178), por lo
+que debemos quedarnos con los paises que aportan más turistas, mostrando también 
+si escogen hotel de ciudad o resort:
+
+```{r country}
+# require(tidyverse)
+# paises con al menos 100 reservas
+xx = x %>% group_by(country) %>% mutate(pais=n()) %>% filter(pais>=100)
+xx$country=factor(xx$country)
+ggplot(data=xx, aes(x=reorder(country, -pais))) + 
+  geom_bar(stat="count", aes(fill=hotel)) +
+  theme_light() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) 
+```
+
+Obviamente, Portugal (PRT) ocupa la primera posición destacada, seguida de paises
+"cercanos", como Gran Bretaña, Francia y España. Los visitantes de Gran Bretaña 
+e Irlanda optan más por un resort, mientras que los de Francia, Alemania e Italia
+principalmente visitan la ciudad de Lisboa.
+
+EJERCICIO: existen diferencias entre los habitantes de Portugal (del país) y el
+resto ("extranjeros")? 
+
+```{r 3.EXERCICI_country Portugal vs guiris}
+# Etiquetem reserves segons país d'origen (Portual o altre)
+x$origin <- ifelse(x$country == "PRT", "Resident", "Foreigner")
+
+# Comparem la taxa (percentatge) de cancel.lació
+library(dplyr)
+cancel_rate <- x %>%
+  group_by(origin) %>%
+  summarise(
+    cancellations = mean(as.numeric(is_canceled)) * 100,
+    count = n()
+  )
+print(cancel_rate)
+# Per últim, mostrem els reultats en gràfic de barres
+ggplot(cancel_rate, aes(x = origin, y = cancellations, fill = origin)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Taxa de cancel.lació segons origen",
+       x = "Origen", y = "Porcentatge cancel.lacions") +
+  theme_minimal()
+
+
+
+```
+Taxa de cancel.lació:
+La taxa de cancel.lació és molt més alta que la dels estrangers.
+La meitat de les reserves fetes pels residents són cancel.lades.
+Segurament la confiança augmenta la impulsivitat i la flexibilitat.
+Els estrangers planifiquen millor al ser viatges més llars.
+
+
+```{r 3.EXERCICI_country Portugal vs guiris part 2}
+# Comparem ADR amb test estadístic
+t.test(adr ~ origin, data = x)
+
+# Creem el gràfic de distribució
+ggplot(x, aes(x = origin, y = lead_time, fill = origin)) +
+  geom_violin(trim = TRUE) +
+  geom_boxplot(width = 0.2, outlier.shape = NA) +
+  labs(title = "Lead Time: Portuguesos vs Estrangers",
+       x = "Origen", y = "Temps de planificació (dies)") +
+  theme_minimal()
+
+
+
+
+```
+
+ADR:
+
+el p-valor del test és 2.2e-16, la qual cosa ens fa apreciar una diferència gran entre els grups.
+Els estrangers gasten més per nit, segurament perquè estan dispoats a pagar preus més alts o potser perquè trien allotjaments de més qualitat. També pot ser perquè tiren dates de vacances llargues.
+
+
+Otra de las variables interesantes es is_canceled que nos indica si una reserva
+fue cancelada o no (un 37.0% de las veces). Podemos ver la relación entre dos
+variables categóricas usando un gráfico de mosaico:
+
+```{r mosaic_hotel_is_canceled}
+# require(ggmosaic)
+x$is_canceled=as.factor(x$is_canceled)
+ggplot(data=x) + 
+  geom_mosaic(aes(x=product(is_canceled, hotel), fill=hotel)) +
+  theme_light() 
+```
+Se puede observar que el porcentaje de cancelaciones (1 en el eje Y) en un resort
+es inferior al de un hotel en la ciudad de Lisboa. En el eje X, los tamaños 
+relativos de cada columna se corresponden también con la proporción de cada tipo
+de hotel. Es importante no pensar en las etiquetas del eje Y (0 / 1) como la 
+propoción numérica real de cancelación, ya que puede llevar a engaño.
+
+En el caso de cancelación por país para los países con más turistas:
+
+```{r mosaic_country_is_canceled}
+# paises con al menos 1000 reservas
+xx = x %>% group_by(country) %>% mutate(pais=n()) %>% filter(pais>=1000)
+xx$country=factor(xx$country)
+ggplot(data=xx) + 
+  geom_mosaic(aes(x=product(is_canceled, country), fill=country)) +
+  theme_light() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) 
+```
+Se puede comprobar que la tasa de cancelaciones es mucho mayor para los turistas
+locales (de Portugal, PRT), mientras que es mucho más baja para el resto de
+paises. No obstante, este gráfico no es de lectura fácil, en este caso no hay
+ningún orden ni de los paises ni del porcentaje de cancelaciones.
+
+EJERCICIO: mejorar el gráfico anterior para hacerlo más inteligible, y plantearse
+si es posible visualizar las relaciones entre tres o más variables de tipo
+categórico.
+
+
+```{r EXERCICI_mosaic_country_is_canceled_millorat}
+# Simplifiquem i millorem  gràfic de mosaics per fer-lo més intel.ligible.
+library(forcats)
+xx <- x %>%
+  group_by(country) %>%
+  filter(n() >= 100) %>%
+  mutate(country = fct_reorder(country, is_canceled, .fun = mean))
+ggplot(data=xx, aes(x=country, fill=is_canceled)) +
+  geom_bar(position="fill") +
+  coord_flip() +
+  labs(title="Cancel·lacions per país",
+       x="País", y="Proporció de cancel·lacions") +
+  theme_light()
+
+
+```
+
+
+Finalmente, vamos a analizar el comportamiento de las reservas con respecto a la
+fecha de entrada. Primero, usando el package lubridate de R (una maravilla para
+manipular datos de tipo fecha y hora) crearemos una variable dia para saber qué 
+día de la semana fue la llegada al hotel, y analizaremos cuantas reservas hubo
+cada día:
+
+```{r dia}
+# require(lubridate)
+x$dia=as_date(paste0(x$arrival_date_year,'-',x$arrival_date_month,'-',x$arrival_date_day_of_month))
+ggplot(data=x,aes(x=dia,group=arrival_date_year,color=arrival_date_year)) + 
+  geom_bar() + 
+  theme_light() 
+```
+Tal y como describe el artículo, los datos comprenden desde el 1 de Julio de 
+2015 hasta el 31 de agosto de 2017. Se pueden observar algunos picos que podrían
+ser interesantes.
+
+EJERCICIO: mejorar y desdoblar el gráfico anterior por tipo de hotel o por país 
+de orígen.
+
+```{r dia2}
+# Llibreries necessàries
+library(lubridate)
+library(ggplot2)
+library(dplyr)
+
+# 1. Crear la variable 'dia' assegurant-nos que és una data vàlida
+x$dia <- as_date(paste0(x$arrival_date_year, "-", x$arrival_date_month, "-", x$arrival_date_day_of_month))
+
+# 2. Filtrar files amb valors vàlids
+x <- x %>% filter(!is.na(dia))
+
+# 3. Crear el gràfic per mostrar la tendència de les reserves per dia
+ggplot(data = x, aes(x = dia, color = as.factor(arrival_date_year))) +
+  geom_line(stat = "count", size = 1) +  # Utilitzar línies per mostrar la tendència
+  scale_color_brewer(palette = "Dark2", name = "Any d'arribada") +  # Millorar els colors
+  labs(
+    title = "Tendència de reserves per dia",
+    x = "Data",
+    y = "Nombre de reserves"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "top",
+    axis.text.x = element_text(angle = 45, hjust = 1)  # Rotar etiquetes de l'eix X
+  )
+
+```
+
+
+
+
+Con el día calculado, junto con las variables stays_in_week/weekend_nights 
+podemos tratar de categorizar manualmente el tipo de viaje, de acuerdo a los
+siguientes criterios (arbitrarios, claramente mejorables):
+
+1) si stays_in_weekend_nights es cero => viaje de trabajo
+2) si stays_in_week_nights es cero o uno y en este caso la entrada es en 
+   viernes => fin de semana
+3) si stays_in_week_nights es cinco y stays_in_weekend_nights es tres 
+  (es decir, de sábado a sábado o de domingo a domingo o de sábado a domingo) 
+   => paquete semanal de vacaciones
+4) si stays_in_weekend_nights es uno o dos y stays_in_week_days es cinco o menos
+   => trabajo + descanso
+5) el resto => vacaciones
+
+Una manera de refinar esta clasificación sería mirar la cantidad de adultos,
+niños y bebés para decidir si se trata de una persona viajando por trabajo o
+bien una familia.
+
+```{r tipo_visita}
+# require(lubridate)
+x$tipo=ifelse(x$stays_in_weekend_nights==0, "work",
+       ifelse(x$stays_in_week_nights==0, "weekend",
+       ifelse(x$stays_in_week_nights==1 & wday(x$dia)==6, "weekend",
+       ifelse(x$stays_in_week_nights==5 & (x$stays_in_weekend_nights==3 | x$stays_in_weekend_nights==4), "package",
+       ifelse(x$stays_in_week_nights<=5 & x$stays_in_weekend_nights<3, "work+rest",
+       "rest")))))
+```
+
+
+Las posibilidades son infinitas: se puede enriquecer el dataset con datos de tipo
+geográfico (la distancia entre paises), demográficos, económicos (renta per capita),
+etc. Debéis explorar este dataset y en este proceso de exploración decidir qué
+historia queréis explicar sobre el mismo.
+
+```{r EXERCICI_ADDICIONAL_1}
+# Anàlisi de cancel·lacions per país
+
+# Llibreries
+library(dplyr)
+library(ggplot2)
+library(forcats)
+
+# 1. Convertim is_canceled a factor (x poder agrupar)
+x$is_canceled <- as.factor(x$is_canceled)
+
+
+# 2. Filtrem x països amb  100 reserves mínim i reordenar x proporció cancel·lacions
+xx <- x %>%
+  group_by(country) %>%
+  filter(n() >= 100) %>%  # països >=100 reserves
+  summarise(
+    cancel_rate = mean(as.numeric(as.character(is_canceled))),  # Proporció cancel.lacions
+    total_reserves = n()
+  ) %>%
+  arrange(desc(cancel_rate))  # Ordenem països segons  proporció x fer-lo més impactant i entendidoor
+
+
+
+# 3. Reordenem països x cancel_rate
+x$country <- factor(x$country, levels = xx$country)
+
+
+# 4. Creem gràfic de barres apilat (% x país)
+plot <- ggplot(data = x %>% filter(country %in% xx$country), aes(x = country, fill = is_canceled)) +
+  geom_bar(position = "fill") +  # Gràfic apilat 
+  coord_flip() +  # Girem x facilitar la lectura
+  scale_fill_manual(
+    values = c("0" = "lightblue", "1" = "tomato"),
+    labels = c("No cancel·lada", "Cancel·lada")
+  ) +  # Colors cotnrastats
+  labs(
+    title = "Proporció de cancel.lacions per país",
+    x = "País",
+    y = "Proporció de reserves",
+    fill = "Estat de la reserva"
+  ) +
+  theme_light() +
+  theme(
+    axis.text.y = element_text(size = 6),  # Mida text països
+    plot.margin = margin(10, 20, 10, 10)  # Mida marges
+  ) +
+  theme(plot.title = element_text(hjust = 0.5))  # Centrem títol
+
+# 5. Mostrem gràfic
+print(plot)
+
+# 6. Guardem gràfic 
+ggsave("cancelacions_per_pais.png", plot = plot, height = 15, width = 8)
+
+
+
+```
+
+
