@@ -1,0 +1,184 @@
+/* Colors definits */
+:root {
+  --dark-olive-green: #5F6F52; /* Títols */
+  --laurel-green: #A9B388; /* Text en general */
+  --cornsilk: #FEFAE0; /* Fons */
+  --lemon-meringue: #F9EBC7; /* Gràfiques i dibuixos */
+  --camel: #B99470;
+  --alloy-orange: #C4661F;
+  --russet: #783D19;
+}
+
+/* Estils globals */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: var(--cornsilk);
+  color: var(--laurel-green);
+}
+
+header {
+  background-color: var(--cornsilk);
+  color: var(--dark-olive-green);
+  padding: 20px;
+  text-align: center;
+}
+
+nav button {
+  margin: 0 5px;
+  padding: 10px 15px;
+  border: 1px solid var(--camel);
+  background-color: var(--laurel-green);
+  color: white;
+  cursor: pointer;
+  border-radius: 5px;
+  font-size: 16px;
+  transition: background-color 0.3s;
+}
+
+nav button:hover {
+  background-color: var(--dark-olive-green);
+}
+
+/* Seccions */
+section {
+  margin: 20px auto;
+  padding: 20px;
+  background-color: var(--lemon-meringue);
+  border-radius: 10px;
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+  max-width: 900px;
+}
+
+h1, h2, h3 {
+  color: var(--dark-olive-green);
+  margin-bottom: 10px;
+}
+
+p {
+  color: var(--laurel-green);
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* Gràfiques */
+/*svg {
+  border: 1px solid var(--camel);
+  margin-top: 20px;
+  border-radius: 5px;
+  background-color: var(--cornsilk);
+}
+*/
+
+svg {
+  background-color: var(--lemon-meringue);
+  border: 1px solid var(--camel);
+  border-radius: 10px;
+}
+.bar {
+  stroke: var(--camel); /* Línia fina al voltant de les barres */
+  stroke-width: 0.5px;
+  fill: var(--alloy-orange);
+}
+
+.bar:hover {
+  opacity: 0.8; /* Redueix lleugerament l'opacitat de la barra al passar el cursor */
+}
+
+/* Estil del Tooltip */
+div.tooltip {
+  pointer-events: none; /* Evita que el ratolí interactuï amb el tooltip */
+  position: absolute;
+  background-color: var(--dark-olive-green);
+  color: white;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+/* Mapa */
+#mapa {
+  margin: 0 auto;
+  width: 800px;
+  height: 500px;
+  border: 1px solid var(--camel);
+  border-radius: 5px;
+}
+
+#mapa-tooltip {
+  font-size: 12px;
+  pointer-events: none;
+  opacity: 0.9;
+}
+
+/* Llista de Països */
+#llista-paisos {
+  list-style-type: disc;
+  margin-left: 20px;
+  font-size: 1rem;
+  color: var(--dark-olive-green);
+}
+
+#llista-paisos li {
+  margin-bottom: 5px;
+}
+
+/* Cercles */
+.circle {
+  fill: var(--lemon-meringue);
+  stroke: var(--dark-olive-green);
+  stroke-width: 2px;
+}
+
+.circle.secondary {
+  fill: var(--camel);
+}
+
+.circle.highlight {
+  fill: var(--alloy-orange);
+}
+
+.circle.loss {
+  fill: var(--russet);
+}
+
+/* Etiquetes dins dels cercles */
+.circle-text {
+  font-size: 16px;
+  fill: white;
+  text-anchor: middle;
+}
+
+/* Llegendes */
+.legend {
+  font-size: 14px;
+  color: var(--dark-olive-green);
+}
+
+/* Eixos i textos de gràfiques */
+.axis line,
+.axis path {
+  stroke: var(--dark-olive-green);
+}
+
+.axis text {
+  fill: var(--dark-olive-green);
+  font-size: 14px;
+}
+.final-text {
+  margin-top: 70px;
+  display: block;
+  color: #5F6F52; /* Dark Olive Green */
+  font-size: 2rem;
+}
+footer {
+  text-align: center;
+  padding: 10px 0;
+  font-size: 0.9rem;
+  color: var(--dark-olive-green); /* Text en verd oliva fosc */
+  background-color: var(--cornsilk); /* Fons uniforme */
+  border-top: 1px solid var(--camel); /* Línia subtil opcional */
+}
+

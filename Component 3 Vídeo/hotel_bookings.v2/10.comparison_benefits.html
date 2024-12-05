@@ -1,0 +1,53 @@
+
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comparació de Beneficis</title>
+    <link rel="stylesheet" href="./css/styles.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--cornsilk);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: var(--dark-olive-green);
+        }
+
+        p {
+            color: var(--laurel-green);
+        }
+
+        #comparison_chart {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Comparació de Beneficis: Actual vs Millorat</h1>
+        <p>
+            Aquesta gràfica mostra els beneficis actuals i els beneficis millorats per una estratègia de reducció de cancel·lacions 
+            i augment de les despeses diàries. Els valors es representen en milers d'euros.
+        </p>
+    </header>
+    <main>
+        <div id="comparison_chart"></div>
+    </main>
+    <footer>
+        <p style="text-align: center;">Visualització de dades 2024 - fmoner@uoc.edu
+    <script src="./js/comparison_benefits.js"></script>
+</body>
+</html>

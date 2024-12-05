@@ -1,0 +1,36 @@
+<!-- 3.adr_paisos.html -->
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADR per País</title>
+    <link rel="stylesheet" href="./css/styles.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+        h1 {
+            margin: 20px 0;
+            color: #407f7f;
+        }
+        p {
+            margin: 0 0 20px;
+        }
+        svg {
+            margin: 20px auto;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <h1>ADR Mitjà per País</h1>
+    <p>Visualització de l'ingrés mitjà per nit segons el país d'origen dels clients.</p>
+    <svg id="chart" width="800" height="500"></svg>
+    <script src="./js/adr_paisos.js"></script>
+</body>
+</html>

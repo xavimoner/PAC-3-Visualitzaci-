@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa de Cancel·lacions</title>
+    <link rel="stylesheet" href="./css/styles.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://d3js.org/topojson.v2.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--cornsilk);
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+        h1 {
+            margin: 20px 0;
+            color: var(--dark-olive-green);
+        }
+        p {
+            margin: 0 0 20px;
+            color: var(--laurel-green);
+        }
+        #mapa {
+            margin: 0 auto;
+            display: block;
+        }
+        #mapa-tooltip {
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Mapa de Cancel·lacions</h1>
+    <p>Visualitzem els països amb una taxa de cancel·lació inferior al 26%.</p>
+    <div id="mapa"></div>
+    <script src="./js/mapa_cancel.js"></script>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anàlisi Visual</title>
+    <link rel="stylesheet" href="./css/styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: var(--cornsilk);
+        }
+        .content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            text-align: center;
+        }
+        h1 {
+            font-size: 3rem;
+            color: var(--dark-olive-green);
+            opacity: 0;
+        }
+        ul {
+            list-style: none;
+            margin: 20px;
+            padding: 0;
+            opacity: 0;
+        }
+        li {
+            font-size: 1.5rem;
+            color: var(--laurel-green);
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="content">
+        <h1 id="title">Anàlisi Visual</h1>
+        <ul id="list">
+            <li>Gràfics de barres per comparar ADR.</li>
+            <li>Gràfics de bombolles per beneficis per país.</li>
+            <li>Gràfics de línies per analitzar impactes temporals.</li>
+            <li>Gràfics horitzontals per comparar beneficis.</li>
+        </ul>
+    </div>
+    <script>
+        gsap.to("#title", { duration: 2, opacity: 1, y: -20 });
+        gsap.to("#list", { duration: 2, opacity: 1, delay: 1 });
+    </script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cancel·lacions per País</title>
+    <link rel="stylesheet" href="./css/styles.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+            background-color: var(--cornsilk);
+        }
+        h1 {
+            margin: 20px 0;
+            color: var(--dark-olive-green);
+        }
+        p {
+            margin: 0 0 20px;
+            color: var(--laurel-green);
+        }
+        svg {
+            margin: 20px auto;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <h1>Cancel·lacions per País</h1>
+    <p>Taxa de cancel·lació per país ordenada de major a menor.</p>
+    <svg id="chart2" width="800" height="500"></svg>
+    <script src="./js/cancel_per_pais.js"></script>
+</body>
+</html>

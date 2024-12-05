@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metodologia</title>
+    <link rel="stylesheet" href="./css/styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: var(--cornsilk);
+        }
+        .content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            text-align: center;
+        }
+        h1 {
+            font-size: 3rem;
+            color: var(--dark-olive-green);
+            opacity: 0;
+        }
+        p {
+            font-size: 1.5rem;
+            color: var(--laurel-green);
+            margin-top: 20px;
+            opacity: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="content">
+        <h1 id="title">Metodologia</h1>
+        <p id="text">Dades extretes del conjunt <strong>Hotel Bookings</strong>.<br>Hem utilitzat llibreries com <strong>D3.js</strong>, <strong>R</strong> i <strong>ScrollMagic</strong> per generar una narrativa visual coherent.</p>
+    </div>
+    <script>
+        gsap.to("#title", { duration: 2, opacity: 1, y: -20 });
+        gsap.to("#text", { duration: 2, opacity: 1, delay: 1 });
+    </script>
+</body>
+</html>

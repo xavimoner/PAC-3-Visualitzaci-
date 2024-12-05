@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bubble Chart: Beneficis per País</title>
+    <link rel="stylesheet" href="./css/styles.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-force@3"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: var(--cornsilk);
+        }
+        header {
+            text-align: center;
+            padding: 20px;
+            color: var(--dark-olive-green);
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        p {
+            font-size: 1.2rem;
+            color: var(--laurel-green);
+        }
+        main {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 70vh; 
+        }
+        #bubble_chart {
+            width: 80%;
+            height: 100%;
+        }
+        footer {
+            text-align: center;
+            padding: 10px 0;
+            font-size: 0.9rem;
+            color: var(--dark-olive-green); 
+            background-color: var(--cornsilk); 
+            border-top: 1px solid var(--camel); 
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Bubble Chart: Beneficis per País</h1>
+        <p>Visualització dels beneficis totals per país amb la mida de les bombolles proporcional al benefici total:</p>
+    </header>
+    <main>
+        <div id="bubble_chart"></div>
+    </main>
+    <footer>
+        <p>Visualització de dades 2024 - fmoner@uoc.edu</p>
+    </footer>
+    <script src="./js/bubble_chart.js"></script>
+</body>
+</html>

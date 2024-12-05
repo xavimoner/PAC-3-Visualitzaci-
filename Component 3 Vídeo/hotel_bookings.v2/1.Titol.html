@@ -1,0 +1,63 @@
+<!-- 1.Titol.html -->
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eficiència Hostelera a Portugal</title>
+    <link rel="stylesheet" href="./css/styles.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--cornsilk); /* Fons paleta */
+            overflow: hidden; /* NO scroll durant animació */
+        }
+        .slide {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            text-align: center;
+            color: var(--dark-olive-green); /* Títol principal */
+        }
+        h1 {
+            font-size: 5rem; /* Títol augmentat */
+            margin-bottom: 20px;
+            opacity: 0; /* Comença invisible */
+            transform: translateY(-50px); /* Comença cap a dalt */
+            animation: fadeInSlide 3s ease-out forwards; /* Animació entrada */
+        }
+        p {
+            font-size: 2rem; /* Subtítol més gran */
+            color: var(--laurel-green); /* Subtítol */
+            opacity: 0; /* Comença invisible */
+            animation: fadeIn 3s ease-out 1s forwards; /* Subtítol després títol */
+        }
+
+        /* Animació entrada p títol */
+        @keyframes fadeInSlide {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Animació entrada subtítol */
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="slide">
+        <h1>Eficiència Hostelera a Portugal</h1>
+        <p>Una exploració visual de les dades sobre cancel·lacions, beneficis i patrons de reserves.</p>
+    </div>
+</body>
+</html>
